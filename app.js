@@ -1,7 +1,7 @@
 const express = require("express");
 const morgan = require("morgan");
 
-// const userRouter = require("../routes/users/userRouter");
+const userRouter = require("./src/routes/users/usersRoutes");
 const authRouter = require("./src/routes/auth/authRoute");
 // const brancheRouter = require("../routes/branches/brancheRouter");
 // const {
@@ -20,7 +20,7 @@ app.use(express.json()); //pass incoming json data
 app.use("/api/v1", authRouter);
 
 /** User routes */
-// app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users", userRouter);
 
 /** Branche routes */
 // app.use("/api/v1/branches", brancheRouter);
