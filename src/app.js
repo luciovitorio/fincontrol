@@ -1,13 +1,13 @@
 const express = require("express");
 const morgan = require("morgan");
 
-const userRouter = require("./src/routes/users/usersRoutes");
-const authRouter = require("./src/routes/auth/authRoute");
-// const brancheRouter = require("../routes/branches/brancheRouter");
-// const {
-//   globalErrorHandler,
-//   notFoundError,
-// } = require("../middlewares/globalErrorHandler");
+const userRouter = require("./routes/users/usersRoutes");
+const authRouter = require("./routes/auth/authRoute");
+
+const {
+  globalErrorHandler,
+  notFoundError,
+} = require("./middlewares/globalErrorHandler");
 
 const app = express();
 
@@ -26,7 +26,7 @@ app.use("/api/v1/users", userRouter);
 // app.use("/api/v1/branches", brancheRouter);
 
 //Error middlewares
-// app.use(notFoundError);
-// app.use(globalErrorHandler);
+app.use(notFoundError);
+app.use(globalErrorHandler);
 
 module.exports = app;

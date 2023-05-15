@@ -18,7 +18,7 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
   });
 
   if (user) {
-    const error = new Error("Nome de usuário já cadastrado com esse nome");
+    const error = new Error("Usuário já cadastrado com esse nome");
     error.statusCode = 409;
     throw error;
   }
@@ -62,6 +62,8 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
     message: "Usuário criado com sucesso",
     data: newUser,
   });
+
+  await prisma.$disconnect();
 });
 
 /**
@@ -69,177 +71,176 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
  * @route GET /api/v1/users
  * @access Private
  */
-// exports.indexUserController = AsyncHandler(async (req, res) => {
-//   const users = await User.findAll({
-//     include: {
-//       model: Branche,
-//       attributes: ["name", "address", "phone", "whatsapp"],
-//     },
-//     attributes: ["id", "document", "isActive", "name", "email", "role"],
-//   });
+exports.indexUserController = AsyncHandler(async (req, res) => {
+  const users = await prisma.user.findMany({
+    select: {
+      id: true,
+      username: true,
+      email: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-//   return res.json({
-//     data: users,
-//   });
-// });
+  await prisma.$disconnect();
+
+  return res.json({
+    data: users,
+  });
+});
 
 /**
  * @desc Show user
  * @route GET /api/v1/users/:id
  * @access Private
  */
-// exports.showUserController = AsyncHandler(async (req, res) => {
-//   const { id } = req.params;
+exports.showUserController = AsyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-//   const user = await User.findOne({
-//     where: { id },
-//     include: {
-//       model: Branche,
-//       attributes: ["name", "address", "phone", "whatsapp"],
-//     },
-//     attributes: [
-//       "id",
-//       "username",
-//       "is_active",
-//       "name",
-//       "email",
-//       "phone",
-//       "role",
-//     ],
-//   });
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
 
-//   // Verificando se o id é um id válido
-//   if (!user) {
-//     const error = new Error("Usuário não encontrado");
-//     error.statusCode = 404;
-//     throw error;
-//   }
+  // Verificando se o id é um id válido
+  if (!user) {
+    const error = new Error("Usuário não encontrado");
+    error.statusCode = 404;
+    throw error;
+  }
 
-//   return res.json({
-//     data: user,
-//   });
-// });
+  await prisma.$disconnect();
+
+  return res.json({
+    data: user,
+  });
+});
 
 /**
  * @desc Update user
  * @route GET /api/v1/users/:id
  * @access Private
  */
-// exports.updateUserController = AsyncHandler(async (req, res) => {
-//   const { id } = req.params;
-//   const {
-//     username,
-//     password,
-//     password_confirmation,
-//     is_active,
-//     name,
-//     email,
-//     phone,
-//     role,
-//     brancheId,
-//   } = req.body;
+exports.updateUserController = AsyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { username, password, password_confirmation, email } = req.body;
 
-//   const verifyIfUserExists = await User.findByPk(id);
-//   const userData = verifyIfUserExists;
+  const verifyIfUserExists = await prisma.user.findUnique({
+    where: { id },
+  });
 
-//   // Verificando se o id é um id válido
-//   if (!verifyIfUserExists) {
-//     const error = new Error("Usuário não encontrado");
-//     error.statusCode = 404;
-//     throw error;
-//   }
+  // Verificando se o id é um id válido
+  if (!verifyIfUserExists) {
+    const error = new Error("Usuário não encontrado");
+    error.statusCode = 404;
+    throw error;
+  }
 
-//   // Verificando se o id da filial foi passado e se é valido
-//   if (brancheId) {
-//     const isBrancheExists = await Branche.findByPk(brancheId);
-//     if (!isBrancheExists) {
-//       const error = new Error("Loja não encontrada");
-//       error.statusCode = 404;
-//       throw error;
-//     }
-//   }
+  // Verificando se já existe um usuario com o email
+  if (email) {
+    const verifyIfEmailExist = await prisma.user.findFirst({
+      where: {
+        email,
+        NOT: {
+          id,
+        },
+      },
+    });
 
-//   // Verificando se o usuário enviou a senha para alterar
-//   if (password && password !== password_confirmation) {
-//     const error = new Error("As senhas não conferem");
-//     error.statusCode = 400;
-//     throw error;
-//   }
+    if (verifyIfEmailExist) {
+      const error = new Error("Já existe um usuário com esse email");
+      error.statusCode = 409;
+      throw error;
+    }
+  }
 
-//   let hashedPassword;
+  // Verificando se o usuário enviou a senha para alterar
+  if (password && password !== password_confirmation) {
+    const error = new Error("As senhas não conferem");
+    error.statusCode = 400;
+    throw error;
+  }
 
-//   // Verificando se o usuario enviou a senha para atualizar e criptografando ela
-//   if (password) {
-//     hashedPassword = await bcrypt.hash(password, 10);
-//   }
+  let hashedPassword;
 
-//   // Verificando se o nome de usuário já existe.
-//   if (!username) {
-//     const error = new Error("Nome de usuário obrigatório");
-//     error.statusCode = 404;
-//     throw error;
-//   }
+  // Verificando se o usuario enviou a senha para atualizar e criptografando ela
+  if (password) {
+    hashedPassword = await bcrypt.hash(password, 10);
+  }
 
-//   const verifyIfUsernameExist = await User.findOne({
-//     where: {
-//       username,
-//       id: {
-//         [Op.ne]: userData.dataValues.id,
-//       },
-//     },
-//   });
+  // Verificando se o nome de usuário já existe.
+  if (!username) {
+    const error = new Error("Nome de usuário obrigatório");
+    error.statusCode = 404;
+    throw error;
+  }
 
-//   if (verifyIfUsernameExist) {
-//     const error = new Error("Já existe um usuário com esse nome");
-//     error.statusCode = 409;
-//     throw error;
-//   }
+  const verifyIfUsernameExist = await prisma.user.findFirst({
+    where: {
+      username,
+      NOT: {
+        id,
+      },
+    },
+  });
 
-//   await User.update(
-//     {
-//       username,
-//       password: hashedPassword,
-//       password_confirmation,
-//       is_active,
-//       name,
-//       email,
-//       phone,
-//       role,
-//       brancheId,
-//     },
-//     {
-//       where: { id },
-//       returning: true,
-//     }
-//   );
+  if (verifyIfUsernameExist) {
+    const error = new Error("Já existe um usuário com esse nome");
+    error.statusCode = 409;
+    throw error;
+  }
 
-//   res.status(200).json({
-//     status: "success",
-//     message: "Usuário alterado com sucesso",
-//   });
-// });
+  await prisma.user.update({
+    where: { id },
+    data: {
+      username,
+      password: hashedPassword,
+      email: email ? email : null,
+    },
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "Usuário alterado com sucesso",
+  });
+
+  await prisma.$disconnect();
+});
 
 /**
  * @desc Destroy user
  * @route GET /api/v1/users/:id
  * @access Private
  */
-// exports.destroyUserController = AsyncHandler(async (req, res) => {
-//   const { id } = req.params;
+exports.destroyUserController = AsyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-//   const user = await User.findByPk(id);
+  const user = await prisma.user.findUnique({
+    where: { id },
+  });
 
-//   // Verificando se o id é um id válido
-//   if (!user) {
-//     const error = new Error("Usuário não encontrado");
-//     error.statusCode = 404;
-//     throw error;
-//   }
+  // Verificando se o id é um id válido
+  if (!user) {
+    const error = new Error("Usuário não encontrado");
+    error.statusCode = 404;
+    throw error;
+  }
 
-//   await user.destroy();
+  await prisma.user.delete({
+    where: { id },
+  });
 
-//   res.status(200).json({
-//     status: "success",
-//     message: "Registro excluído com sucesso",
-//   });
-// });
+  res.status(200).json({
+    status: "success",
+    message: "Registro excluído com sucesso",
+  });
+
+  await prisma.$disconnect();
+});

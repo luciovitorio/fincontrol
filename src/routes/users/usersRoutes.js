@@ -1,36 +1,35 @@
 const express = require("express");
 const {
   storeUserController,
-  // indexUserController,
-  // showUserController,
-  // updateUserController,
-  // destroyUserController,
+  indexUserController,
+  showUserController,
+  updateUserController,
+  destroyUserController,
 } = require("../../controllers/userController");
-// const { validateCreateUser } = require("../../middlewares/validateCreateUser");
-// const isLogin = require("../../middlewares/isLogin");
+const {
+  validateCreateUser,
+} = require("../../middlewares/validations/validateCreateUser");
+const isLogin = require("../../middlewares/isLogin");
+const {
+  validateUpdateUser,
+} = require("../../middlewares/validations/validateUpdateUser");
 // const isAdmin = require("../../middlewares/isAdmin");
 // const { validateUpdateUser } = require("../../middlewares/validateUpdateUser");
 const userRouter = express.Router();
 
 // Store
-userRouter.post("/", storeUserController);
+userRouter.post("/", isLogin, validateCreateUser, storeUserController);
 
 // Index
-// userRouter.get("/", isLogin, isAdmin, indexUserController);
+userRouter.get("/", isLogin, indexUserController);
 
 // Show
-// userRouter.get("/:id", isLogin, isAdmin, showUserController);
+userRouter.get("/:id", isLogin, showUserController);
 
 // Update
-// userRouter.put(
-//   "/:id",
-//   isLogin,
-//   isAdmin,
-//   validateUpdateUser,
-//   updateUserController
-// );
+userRouter.put("/:id", isLogin, validateUpdateUser, updateUserController);
 
 // Destroy
-// userRouter.delete("/:id", isLogin, isAdmin, destroyUserController);
+userRouter.delete("/:id", isLogin, destroyUserController);
 
 module.exports = userRouter;
