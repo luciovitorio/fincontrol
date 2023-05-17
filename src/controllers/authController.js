@@ -1,10 +1,8 @@
 const AsyncHandler = require("express-async-handler");
-const { PrismaClient } = require("@prisma/client");
+const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const generateToken = require("../utils/generateToken");
 // const verifyToken = require("../utils/verifyToken");
-
-const prisma = new PrismaClient();
 
 /**
  * @desc Login
@@ -14,7 +12,7 @@ const prisma = new PrismaClient();
 exports.loginAuthController = AsyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  const user = await prisma.user.findFirst({
+  const user = await User.findOne({
     where: { username },
   });
 

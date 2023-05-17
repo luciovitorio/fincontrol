@@ -1,8 +1,6 @@
 const AsyncHandler = require("express-async-handler");
-const { PrismaClient } = require("@prisma/client");
+const { User } = require("../models");
 const verifyToken = require("../utils/verifyToken");
-
-const prisma = new PrismaClient();
 
 const isLogin = AsyncHandler(async (req, res, next) => {
   const headerObj = req.headers;
@@ -18,11 +16,7 @@ const isLogin = AsyncHandler(async (req, res, next) => {
   const { id } = verifyToken(token);
 
   // Verificando se o token enviado na requisição pertence a algum usuário
-  const verifiedIfExistUserWithThisToken = await prisma.user.findUnique({
-    where: {
-      id,
-    },
-  });
+  const verifiedIfExistUserWithThisToken = await User.findByPk(id);
 
   if (!verifiedIfExistUserWithThisToken) {
     const err = new Error("Token inválido e/ou expirado");
@@ -30,15 +24,9 @@ const isLogin = AsyncHandler(async (req, res, next) => {
   }
 
   if (id) {
-    const user = await prisma.user.findFirst({
-      where: {
-        id,
-      },
-      select: {
-        id: true,
-        username: true,
-        email: true,
-      },
+    const user = await User.findOne({
+      where: { id },
+      attributes: ["id", "username", "email"],
     });
 
     req.userAuth = user;

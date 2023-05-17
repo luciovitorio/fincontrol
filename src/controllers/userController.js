@@ -1,8 +1,7 @@
-const { PrismaClient } = require("@prisma/client");
+const { User, Log } = require("../models");
 const bcrypt = require("bcrypt");
 const AsyncHandler = require("express-async-handler");
-
-const prisma = new PrismaClient();
+const { Op } = require("sequelize");
 
 /**
  * @desc Store user
@@ -13,7 +12,7 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
   const { username, password, password_confirmation, email } = req.body;
 
   // Verificando se o nome de usuário ja existe
-  const user = await prisma.user.findFirst({
+  const user = await User.findOne({
     where: { username },
   });
 
@@ -24,7 +23,7 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
   }
 
   // Verificando se já possui um email cadastrado
-  const emailExists = await prisma.user.findFirst({
+  const emailExists = await User.findOne({
     where: { email },
   });
 
@@ -44,26 +43,16 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
   // Criptografando a senha
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await prisma.user.create({
-    data: {
-      username,
-      password: hashedPassword,
-      email,
-    },
-    select: {
-      id: true,
-      username: true,
-      email: true,
-    },
+  const newUser = await User.create({
+    username,
+    password: hashedPassword,
+    email,
   });
 
   res.status(201).json({
     status: "success",
     message: "Usuário criado com sucesso",
-    data: newUser,
   });
-
-  await prisma.$disconnect();
 });
 
 /**
@@ -72,18 +61,10 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
  * @access Private
  */
 exports.indexUserController = AsyncHandler(async (req, res) => {
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      username: true,
-      email: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+  const users = await User.findAll({
+    attributes: ["id", "username", "email"],
+    order: [["createdAt", "DESC"]],
   });
-
-  await prisma.$disconnect();
 
   return res.json({
     data: users,
@@ -98,15 +79,9 @@ exports.indexUserController = AsyncHandler(async (req, res) => {
 exports.showUserController = AsyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const user = await prisma.user.findUnique({
+  const user = await User.findOne({
     where: { id },
-    select: {
-      id: true,
-      username: true,
-      email: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    attributes: ["id", "username", "email"],
   });
 
   // Verificando se o id é um id válido
@@ -115,8 +90,6 @@ exports.showUserController = AsyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-
-  await prisma.$disconnect();
 
   return res.json({
     data: user,
@@ -132,9 +105,8 @@ exports.updateUserController = AsyncHandler(async (req, res) => {
   const { id } = req.params;
   const { username, password, password_confirmation, email } = req.body;
 
-  const verifyIfUserExists = await prisma.user.findUnique({
-    where: { id },
-  });
+  const verifyIfUserExists = await User.findByPk(id);
+  const userData = verifyIfUserExists;
 
   // Verificando se o id é um id válido
   if (!verifyIfUserExists) {
@@ -145,11 +117,11 @@ exports.updateUserController = AsyncHandler(async (req, res) => {
 
   // Verificando se já existe um usuario com o email
   if (email) {
-    const verifyIfEmailExist = await prisma.user.findFirst({
+    const verifyIfEmailExist = await User.findOne({
       where: {
         email,
-        NOT: {
-          id,
+        id: {
+          [Op.ne]: userData.dataValues.id,
         },
       },
     });
@@ -182,11 +154,11 @@ exports.updateUserController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const verifyIfUsernameExist = await prisma.user.findFirst({
+  const verifyIfUsernameExist = await User.findOne({
     where: {
       username,
-      NOT: {
-        id,
+      id: {
+        [Op.ne]: userData.dataValues.id,
       },
     },
   });
@@ -197,21 +169,23 @@ exports.updateUserController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
-  await prisma.user.update({
-    where: { id },
-    data: {
+  await User.update(
+    {
       username,
       password: hashedPassword,
-      email: email ? email : null,
+      password_confirmation,
+      email,
     },
-  });
+    {
+      where: { id },
+      returning: true,
+    }
+  );
 
   res.status(200).json({
     status: "success",
     message: "Usuário alterado com sucesso",
   });
-
-  await prisma.$disconnect();
 });
 
 /**
@@ -222,9 +196,7 @@ exports.updateUserController = AsyncHandler(async (req, res) => {
 exports.destroyUserController = AsyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const user = await prisma.user.findUnique({
-    where: { id },
-  });
+  const user = await User.findByPk(id);
 
   // Verificando se o id é um id válido
   if (!user) {
@@ -233,9 +205,7 @@ exports.destroyUserController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
-  await prisma.user.delete({
-    where: { id },
-  });
+  await user.destroy();
 
   res.status(200).json({
     status: "success",

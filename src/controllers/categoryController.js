@@ -1,8 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcrypt");
 const AsyncHandler = require("express-async-handler");
-
-const prisma = new PrismaClient();
 
 /**
  * @desc Store category
