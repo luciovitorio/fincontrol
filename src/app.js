@@ -3,6 +3,7 @@ const morgan = require("morgan");
 
 const userRouter = require("./routes/users/usersRoutes");
 const authRouter = require("./routes/auth/authRoute");
+const categoryRouter = require("./routes/categories/categoriesRoutes");
 
 const {
   globalErrorHandler,
@@ -22,8 +23,8 @@ app.use("/api/v1", authRouter);
 /** User routes */
 app.use("/api/v1/users", userRouter);
 
-/** Branche routes */
-// app.use("/api/v1/branches", brancheRouter);
+/** Category routes */
+app.use("/api/v1/categories", categoryRouter);
 
 //Error middlewares
 app.use(notFoundError);

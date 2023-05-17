@@ -8,13 +8,11 @@ const {
 } = require("../../controllers/userController");
 const {
   validateCreateUser,
-} = require("../../middlewares/validations/validateCreateUser");
+} = require("../../middlewares/validations/users/validateCreateUser");
 const isLogin = require("../../middlewares/isLogin");
 const {
   validateUpdateUser,
-} = require("../../middlewares/validations/validateUpdateUser");
-// const isAdmin = require("../../middlewares/isAdmin");
-// const { validateUpdateUser } = require("../../middlewares/validateUpdateUser");
+} = require("../../middlewares/validations/users/validateUpdateUser");
 const userRouter = express.Router();
 
 // Store

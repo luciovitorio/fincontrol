@@ -33,6 +33,18 @@ model Register {
   type      typeRegistersTbl @default(insert)
   createdAt DateTime         @default(now())
   updatedAt DateTime         @updatedAt
+  Category  Category[]
 
   @@map("registers")
+}
+
+model Category {
+  id         String   @id @default(uuid())
+  registerId String
+  register   Register @relation(fields: [registerId], references: [id])
+  name       String   @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("categories")
 }
