@@ -43,7 +43,7 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
   // Criptografando a senha
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({
+  await User.create({
     username,
     password: hashedPassword,
     email,
@@ -211,6 +211,4 @@ exports.destroyUserController = AsyncHandler(async (req, res) => {
     status: "success",
     message: "Registro excluído com sucesso",
   });
-
-  await prisma.$disconnect();
 });

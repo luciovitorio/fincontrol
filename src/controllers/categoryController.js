@@ -1,4 +1,8 @@
+const { Category } = require("../models");
+
 const AsyncHandler = require("express-async-handler");
+const createLogEntry = require("../utils/createLogEntry");
+const { Op } = require("sequelize");
 
 /**
  * @desc Store category
@@ -9,7 +13,7 @@ exports.storeCategoryController = AsyncHandler(async (req, res) => {
   const { name } = req.body;
 
   // Verificando se o nome da categoria ja existe
-  const category = await prisma.category.findFirst({
+  const category = await Category.findOne({
     where: { name },
   });
 
@@ -19,32 +23,27 @@ exports.storeCategoryController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const newRegister = await prisma.register.create({
-    data: {
-      userId: req.userAuth.id,
-      dateOper: new Date(),
-      type: "insert",
-    },
-  });
+  // Gerando Log
+  const categoryData = req.body;
 
-  const newCategory = await prisma.category.create({
-    data: {
-      name,
-      registerId: newRegister.id,
-    },
-    select: {
-      id: true,
-      name: true,
-    },
+  const logData = {
+    userId: req.userAuth.id,
+    type: "CREATE",
+    metadata: categoryData,
+    table: "Categories",
+  };
+
+  const newLog = await createLogEntry(logData);
+
+  await Category.create({
+    name,
+    logId: newLog.id,
   });
 
   res.status(201).json({
     status: "success",
     message: "Categoria criada com sucesso",
-    data: newCategory,
   });
-
-  await prisma.$disconnect();
 });
 
 /**
@@ -53,17 +52,10 @@ exports.storeCategoryController = AsyncHandler(async (req, res) => {
  * @access Private
  */
 exports.indexCategoryController = AsyncHandler(async (req, res) => {
-  const categories = await prisma.category.findMany({
-    select: {
-      id: true,
-      name: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+  const categories = await Category.findAll({
+    attributes: ["id", "name"],
+    order: [["createdAt", "DESC"]],
   });
-
-  await prisma.$disconnect();
 
   return res.json({
     data: categories,
@@ -78,14 +70,9 @@ exports.indexCategoryController = AsyncHandler(async (req, res) => {
 exports.showCategoryController = AsyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const category = await prisma.category.findUnique({
+  const category = await Category.findOne({
     where: { id },
-    select: {
-      id: true,
-      name: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    attributes: ["id", "name"],
   });
 
   // Verificando se o id é um id válido
@@ -94,8 +81,6 @@ exports.showCategoryController = AsyncHandler(async (req, res) => {
     error.statusCode = 404;
     throw error;
   }
-
-  await prisma.$disconnect();
 
   return res.json({
     data: category,
@@ -111,9 +96,7 @@ exports.updateCategoryController = AsyncHandler(async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  const verifyIfCategoryExists = await prisma.category.findUnique({
-    where: { id },
-  });
+  const verifyIfCategoryExists = await Category.findByPk(id);
 
   // Verificando se o id é um id válido
   if (!verifyIfCategoryExists) {
@@ -122,6 +105,8 @@ exports.updateCategoryController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
+  const oldCategory = verifyIfCategoryExists;
+
   // Verificando se o nome de usuário já existe.
   if (!name) {
     const error = new Error("Nome da categoria é obrigatório");
@@ -129,43 +114,47 @@ exports.updateCategoryController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
-  const verifyIfCategoryExist = await prisma.category.findFirst({
+  const verifyIfCategoryNameExist = await Category.findOne({
     where: {
       name,
-      NOT: {
-        id,
+      id: {
+        [Op.ne]: oldCategory.dataValues.id,
       },
     },
   });
 
-  if (verifyIfCategoryExist) {
+  if (verifyIfCategoryNameExist) {
     const error = new Error("Já existe uma categoria com esse nome");
     error.statusCode = 409;
     throw error;
   }
 
-  const newRegister = await prisma.register.create({
-    data: {
-      userId: req.userAuth.id,
-      dateOper: new Date(),
-      type: "alter",
-    },
-  });
+  // Gerando Log
+  const categoryData = req.body;
 
-  await prisma.category.update({
-    where: { id },
-    data: {
+  const logData = {
+    userId: req.userAuth.id,
+    type: "UPDATE",
+    metadata: categoryData,
+    table: "Categories",
+  };
+
+  const newLog = await createLogEntry(logData);
+
+  await Category.update(
+    {
       name,
-      registerId: newRegister.id,
+      logId: newLog.id,
     },
-  });
+    {
+      where: { id },
+    }
+  );
 
   res.status(200).json({
     status: "success",
     message: "Categoria alterada com sucesso",
   });
-
-  await prisma.$disconnect();
 });
 
 /**
@@ -176,9 +165,7 @@ exports.updateCategoryController = AsyncHandler(async (req, res) => {
 exports.destroyCategoryController = AsyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const category = await prisma.category.findUnique({
-    where: { id },
-  });
+  const category = await Category.findByPk(id);
 
   // Verificando se o id é um id válido
   if (!category) {
@@ -187,14 +174,22 @@ exports.destroyCategoryController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
-  await prisma.category.delete({
-    where: { id },
-  });
+  // Gerando Log
+  const categoryData = req.body;
+
+  const logData = {
+    userId: req.userAuth.id,
+    type: "DELETE",
+    metadata: categoryData,
+    table: "Categories",
+  };
+
+  await createLogEntry(logData);
+
+  await category.destroy();
 
   res.status(200).json({
     status: "success",
     message: "Registro excluído com sucesso",
   });
-
-  await prisma.$disconnect();
 });
