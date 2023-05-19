@@ -5,6 +5,7 @@ const userRouter = require("./routes/users/usersRoutes");
 const authRouter = require("./routes/auth/authRoute");
 const categoryRouter = require("./routes/categories/categoriesRoutes");
 const accountRouter = require("./routes/accounts/accountRoute");
+const reportRouter = require("./routes/reports/reportsRoutes");
 
 const {
   globalErrorHandler,
@@ -29,6 +30,9 @@ app.use("/api/v1/categories", categoryRouter);
 
 /** Account routes */
 app.use("/api/v1/accounts", accountRouter);
+
+/** Reports routes */
+app.use("/api/v1/reports", reportRouter);
 
 //Error middlewares
 app.use(notFoundError);

@@ -4,7 +4,15 @@ const { v4: uuidv4 } = require("uuid");
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class AccountUser extends Model {
-    static associate(models) {}
+    static associate(models) {
+      AccountUser.belongsTo(models.User, {
+        foreignKey: "userId",
+      });
+
+      AccountUser.belongsTo(models.Account, {
+        foreignKey: "accountId",
+      });
+    }
   }
   AccountUser.init(
     {
