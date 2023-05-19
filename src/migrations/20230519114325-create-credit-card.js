@@ -29,16 +29,20 @@ module.exports = {
         defaultValue: "VISA",
       },
       number: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },
       dueDate: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      expirationDate: {
         type: Sequelize.DATE,
         allowNull: false,
       },
       limit: {
-        type: Sequelize.DECIMAL,
+        type: Sequelize.DECIMAL(10, 2),
       },
       createdAt: {
         allowNull: false,

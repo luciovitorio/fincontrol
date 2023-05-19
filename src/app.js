@@ -6,6 +6,7 @@ const authRouter = require("./routes/auth/authRoute");
 const categoryRouter = require("./routes/categories/categoriesRoutes");
 const accountRouter = require("./routes/accounts/accountRoute");
 const reportRouter = require("./routes/reports/reportsRoutes");
+const creditCardRouter = require("./routes/creditCard/creditCardRoutes");
 
 const {
   globalErrorHandler,
@@ -30,6 +31,9 @@ app.use("/api/v1/categories", categoryRouter);
 
 /** Account routes */
 app.use("/api/v1/accounts", accountRouter);
+
+/** Credit Card routes */
+app.use("/api/v1/credit-cards", creditCardRouter);
 
 /** Reports routes */
 app.use("/api/v1/reports", reportRouter);

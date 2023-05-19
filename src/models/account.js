@@ -9,6 +9,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "accountId",
         otherKey: "userId",
       });
+      Account.hasMany(models.CreditCard, {
+        foreignKey: "accountId",
+      });
     }
   }
   Account.init(
@@ -18,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
       },
       number: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         unique: true,
       },
       type: {

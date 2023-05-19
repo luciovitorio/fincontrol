@@ -7,10 +7,7 @@ exports.validateCreateAccount = (req, res, next) => {
       "string.uuid": "O campo deve ser um UUID válido",
       "any.required": "O campo associar usuario é obrigatório",
     }),
-    number: Joi.number().required().integer().positive().messages({
-      "number.base": "O campo número da conta deve ser um número",
-      "number.integer": "O campo número da conta deve ser um número inteiro",
-      "number.positive": "O campo número da conta deve ser um número positivo",
+    number: Joi.string().required().max(255).messages({
       "any.required": "O campo número da conta é obrigatório",
       "string.max": "O campo número da conta deve ter no máximo 255 caracteres",
     }),

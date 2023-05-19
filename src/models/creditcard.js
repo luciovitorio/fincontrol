@@ -2,17 +2,22 @@
 const { v4: uuidv4 } = require("uuid");
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class creditCard extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
+  class CreditCard extends Model {
     static associate(models) {
-      // define association here
+      CreditCard.belongsTo(models.Account, {
+        foreignKey: "accountId",
+      });
+    }
+
+    toJSON() {
+      const attributes = { ...this.get() };
+      attributes.expirationDate = attributes.expirationDate
+        .toISOString()
+        .split("T")[0];
+      return attributes;
     }
   }
-  creditCard.init(
+  CreditCard.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -26,11 +31,14 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "VISA",
       },
       number: {
-        type: DataTypes.INTEGER,
-        unique: true,
+        type: DataTypes.STRING,
       },
-      dueDate: DataTypes.DATE,
-      limit: DataTypes.DECIMAL,
+      dueDate: DataTypes.INTEGER,
+      expirationDate: DataTypes.DATE,
+      limit: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0.0,
+      },
     },
     {
       sequelize,
@@ -38,9 +46,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  creditCard.beforeCreate((creditCard) => {
+  CreditCard.beforeCreate((creditCard) => {
     creditCard.id = uuidv4();
   });
 
-  return creditCard;
+  return CreditCard;
 };
