@@ -1,4 +1,4 @@
-const { User, Log } = require("../models");
+const { User, Account } = require("../models");
 const bcrypt = require("bcrypt");
 const AsyncHandler = require("express-async-handler");
 const { Op } = require("sequelize");
@@ -63,6 +63,11 @@ exports.storeUserController = AsyncHandler(async (req, res) => {
 exports.indexUserController = AsyncHandler(async (req, res) => {
   const users = await User.findAll({
     attributes: ["id", "username", "email"],
+    include: {
+      model: Account,
+      attributes: ["number", "type", "balance"],
+      through: { attributes: [] },
+    },
     order: [["createdAt", "DESC"]],
   });
 
@@ -82,6 +87,11 @@ exports.showUserController = AsyncHandler(async (req, res) => {
   const user = await User.findOne({
     where: { id },
     attributes: ["id", "username", "email"],
+    include: {
+      model: Account,
+      attributes: ["number", "type", "balance"],
+      through: { attributes: [] },
+    },
   });
 
   // Verificando se o id é um id válido

@@ -42,6 +42,8 @@ fs.readdirSync(__dirname)
 db.User = require("./user")(sequelize, Sequelize.DataTypes);
 db.Log = require("./log")(sequelize, Sequelize.DataTypes);
 db.Category = require("./category")(sequelize, Sequelize.DataTypes);
+db.Account = require("./account")(sequelize, Sequelize.DataTypes);
+db.AccountUser = require("./accountuser")(sequelize, Sequelize.DataTypes);
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
