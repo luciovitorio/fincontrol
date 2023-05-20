@@ -21,6 +21,8 @@ if (config.use_env_variable) {
   );
 }
 
+config.dialect = process.env.DB_DIALECT;
+
 fs.readdirSync(__dirname)
   .filter((file) => {
     return (
@@ -45,6 +47,7 @@ db.Category = require("./category")(sequelize, Sequelize.DataTypes);
 db.Account = require("./account")(sequelize, Sequelize.DataTypes);
 db.AccountUser = require("./accountuser")(sequelize, Sequelize.DataTypes);
 db.CreditCard = require("./creditcard")(sequelize, Sequelize.DataTypes);
+db.RecurringBill = require("./recurringbill")(sequelize, Sequelize.DataTypes);
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {

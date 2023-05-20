@@ -30,8 +30,15 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "CURRENT",
       },
       balance: {
-        type: DataTypes.DECIMAL(10, 2),
+        type: DataTypes.DECIMAL(10, 2).UNSIGNED,
         defaultValue: 0.0,
+        get() {
+          const value = this.getDataValue("balance");
+          return parseFloat(value);
+        },
+        set(value) {
+          this.setDataValue("balance", parseFloat(value));
+        },
       },
     },
     {

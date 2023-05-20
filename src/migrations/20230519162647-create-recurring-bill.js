@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("CreditCards", {
+    await queryInterface.createTable("RecurringBills", {
       id: {
         type: Sequelize.UUID,
         defaultValue: () => uuidv4(),
@@ -21,28 +21,30 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      alias: {
+      description: {
         type: Sequelize.STRING,
       },
-      flag: {
-        type: Sequelize.ENUM("VISA", "MASTERCARD", "AMERICAN"),
-        defaultValue: "VISA",
-      },
-      number: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      dueDate: {
-        type: Sequelize.INTEGER,
+      amount: {
+        type: Sequelize.DECIMAL(10, 2),
+        defaultValue: 0.0,
         allowNull: false,
       },
-      expirationDate: {
+      initialDate: {
         type: Sequelize.DATE,
         allowNull: false,
       },
-      limit: {
-        type: Sequelize.DECIMAL(10, 2),
+      finishedDate: {
+        type: Sequelize.DATE,
+      },
+      period: {
+        type: Sequelize.ENUM("DAILY", "WEEKLY", "MONTHLY"),
+        defaultValue: "MONTHLY",
+        allowNull: false,
+      },
+      entryType: {
+        type: Sequelize.ENUM("CREDIT", "DEBIT"),
+        defaultValue: "DEBIT",
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -55,6 +57,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("CreditCards");
+    await queryInterface.dropTable("RecurringBills");
   },
 };

@@ -204,10 +204,13 @@ exports.includeAccountController = AsyncHandler(async (req, res) => {
     throw error;
   }
 
-  await AccountUser.create({
-    accountId: id,
-    userId,
-  });
+  await AccountUser.update(
+    {
+      accountId: id,
+      userId,
+    },
+    { where: { accountId: id } }
+  );
 
   res.status(200).json({
     status: "success",
