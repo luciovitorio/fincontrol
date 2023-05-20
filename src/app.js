@@ -8,6 +8,7 @@ const accountRouter = require("./routes/accounts/accountRoute");
 const reportRouter = require("./routes/reports/reportsRoutes");
 const creditCardRouter = require("./routes/creditCard/creditCardRoutes");
 const recurringBillRouter = require("./routes/recurringBills/recurringBillsRoutes");
+const installmentsRouter = require("./routes/installments/intallmentsRoutes");
 
 const {
   globalErrorHandler,
@@ -38,6 +39,9 @@ app.use("/api/v1/credit-cards", creditCardRouter);
 
 /** Recurring Bills routes */
 app.use("/api/v1/recurring-bills", recurringBillRouter);
+
+/** Installments routes */
+app.use("/api/v1/installments", installmentsRouter);
 
 /** Reports routes */
 app.use("/api/v1/reports", reportRouter);
