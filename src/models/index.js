@@ -49,6 +49,7 @@ db.AccountUser = require("./accountuser")(sequelize, Sequelize.DataTypes);
 db.CreditCard = require("./creditcard")(sequelize, Sequelize.DataTypes);
 db.RecurringBill = require("./recurringbill")(sequelize, Sequelize.DataTypes);
 db.Installment = require("./installment")(sequelize, Sequelize.DataTypes);
+db.Goal = require("./goal")(sequelize, Sequelize.DataTypes);
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {

@@ -1,10 +1,5 @@
 const AsyncHandler = require("express-async-handler");
-const {
-  Account,
-  RecurringBill,
-  CreditCard,
-  Installment,
-} = require("../models");
+const { CreditCard, Installment } = require("../models");
 
 /**
  * @desc Store installment
