@@ -17,7 +17,16 @@ module.exports = (sequelize, DataTypes) => {
       },
       cardId: DataTypes.UUID,
       description: DataTypes.STRING,
-      totalAmount: DataTypes.DECIMAL(10, 2),
+      totalAmount: {
+        type: DataTypes.DECIMAL(10, 2),
+        get() {
+          const value = this.getDataValue("totalAmount");
+          return parseFloat(value);
+        },
+        set(value) {
+          this.setDataValue("totalAmount", parseFloat(value));
+        },
+      },
       numInstallments: DataTypes.INTEGER,
       paidInstallments: DataTypes.INTEGER,
       dateOfPurchase: DataTypes.DATE,

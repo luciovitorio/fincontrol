@@ -21,8 +21,27 @@ module.exports = (sequelize, DataTypes) => {
       },
       title: DataTypes.STRING,
       description: DataTypes.STRING,
-      amount: DataTypes.DECIMAL(10, 2),
-      currentAmount: DataTypes.DECIMAL(10, 2),
+      amount: {
+        type: DataTypes.DECIMAL(10, 2),
+        get() {
+          const value = this.getDataValue("amount");
+          return parseFloat(value);
+        },
+        set(value) {
+          this.setDataValue("amount", parseFloat(value));
+        },
+      },
+      currentAmount: {
+        type: DataTypes.DECIMAL(10, 2),
+        get() {
+          const value = this.getDataValue("currentAmount");
+          return parseFloat(value);
+        },
+        set(value) {
+          this.setDataValue("currentAmount", parseFloat(value));
+        },
+      },
+
       startDate: DataTypes.DATE,
       finishedDate: DataTypes.DATE,
     },

@@ -10,6 +10,7 @@ const creditCardRouter = require("./routes/creditCard/creditCardRoutes");
 const recurringBillRouter = require("./routes/recurringBills/recurringBillsRoutes");
 const installmentsRouter = require("./routes/installments/intallmentsRoutes");
 const goalRouter = require("./routes/goals/goalsRoutes");
+const transactionRouter = require("./routes/transactions/transactionsRoutes");
 
 const {
   globalErrorHandler,
@@ -46,6 +47,9 @@ app.use("/api/v1/installments", installmentsRouter);
 
 /** Goals routes */
 app.use("/api/v1/goals", goalRouter);
+
+/** Transactions routes */
+app.use("/api/v1/transactions", transactionRouter);
 
 /** Reports routes */
 app.use("/api/v1/reports", reportRouter);

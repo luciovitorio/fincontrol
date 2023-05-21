@@ -38,6 +38,13 @@ module.exports = (sequelize, DataTypes) => {
       limit: {
         type: DataTypes.DECIMAL(10, 2),
         defaultValue: 0.0,
+        get() {
+          const value = this.getDataValue("limit");
+          return parseFloat(value);
+        },
+        set(value) {
+          this.setDataValue("limit", parseFloat(value));
+        },
       },
     },
     {
